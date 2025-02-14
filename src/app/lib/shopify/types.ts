@@ -9,7 +9,7 @@ export type ShopifyMenuOperation = {
             items: {
                 title: string,
                 url: string
-            };
+            }[];
         };
     };
     variables : {   

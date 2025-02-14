@@ -1,17 +1,23 @@
-import { TAGS } from "./constants";
+import { ensureStartWith } from "../utils";
+import { SHOPIFY_GRAPHQL_API_ENDPOINT, TAGS } from "./constants";
 import { getMenuQuery } from "./queries/menu";
+import { isShopifyError } from "./type-guards";
 import { Menu, ShopifyMenuOperation } from "./types";
 
-const domain =  process.env 
+const domain =  process.env.SHOPIFY_STORE_DOMAIN ? ensureStartWith(process.env.SHOPIFY_STORE_DOMAIN, "https://") : "";
+const endpoint = `${domain}${SHOPIFY_GRAPHQL_API_ENDPOINT}`;
+const key = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN || "";
+type ExtractVariables<T> = T extends { variables: object } ? T['variables'] : never;
+
 export async function shopifyFetch<T>({
     cache = "force-cache",
-    header,
+    headers,
     query, 
     tags,
     variables,
 }: {
     cache?: RequestCache;
-    header?: HeadersInit;
+    headers?: HeadersInit;
     query: string;
     tags?: string[];
     variables?: ExtractVariables<T>;
@@ -21,8 +27,8 @@ export async function shopifyFetch<T>({
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "X-Shopify-Storefront-Access-Token": process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN, 
-                ...header,
+                "X-Shopify-Storefront-Access-Token": key, 
+                ...headers,
             },
             body: JSON.stringify({ 
                 ...(query && { query}),
