@@ -4,21 +4,23 @@ import { truncate } from "fs/promises";
 import Link from "next/link";
 import MobileMenu from "./mobile-menu";
 import Search from "./search";
+import LogoIcon from "@/components/icons/logo";
+import LogoSquare from "@/components/logo-square";
 export async function Navbar() {
 
     const menu  = await getMenu("popyork-menu")
     console.log(menu)
     return (
-        <nav className="felx items-center justify-between p-4 lg:px-8">
+        <nav className="flex items-center justify-between p-4 lg:px-8">
             <div className="block flex-none md:hidden">
                 <MobileMenu menu={menu} />
             </div>
-            <div className="flex w-full items-center">
-                <div className="flex w-full md:w-1/3">
+            <div className="flex w-full items-center justify-center gap-8">
+                <div className="flex w-full md:w-1/3 gap-8">
                 <Link href={"/"} prefetch={true} className="mr-2 flex w-full items-center justify-center md:w-auto ld:mr-6">
-                "..."
+                <LogoSquare />
                 <div className="ml-2 flex-none text-sm font-medium uppercase md:hidden lg:block">
-                    {"Pop york"}
+                    {process.env.SITE_NAME}
                 </div>
                 </Link>
                 {menu.length > 0 ? (
