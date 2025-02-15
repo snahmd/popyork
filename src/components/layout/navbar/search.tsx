@@ -25,7 +25,7 @@ export default function Search() {
     return (
         <form 
             onSubmit={onSubmit}
-            className="relative w-full">
+            className="w-max-[550px] relative w-full lg:w-80 xl:w-full">
             <input
                 name="search"
                 key={ search }
