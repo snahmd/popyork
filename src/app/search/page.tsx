@@ -1,6 +1,6 @@
 import Search from "@/components/layout/navbar/search"
 import { getProducts } from "@/lib/shopify";
-import { sorting } from "@/lib/shopify/constants";
+import { sorting } from "@/lib/constants";
 
 async function SearchPage({ searchParams }: {
     searchParams?: { [key: string]: string | string[] | undefined };
