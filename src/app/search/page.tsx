@@ -1,11 +1,18 @@
 import Search from "@/components/layout/navbar/search"
+import { getProducts } from "@/lib/shopify";
 
-function SearchPage({ searchParams }: {
+async function SearchPage({ searchParams }: {
     searchParams?: { [key: string]: string | string[] | undefined };
 
 }) {
-    const searchValue = searchParams?.q;
-    const products = [];
+    const searchValue = "shirt";
+    const products = []
+    await getProducts({
+        query: searchValue as string,
+        reverse: false,
+        sortKey: "RELEVANCE",
+    });
+    const resultsText = 1
     return (
         <div>
             {searchValue ? (

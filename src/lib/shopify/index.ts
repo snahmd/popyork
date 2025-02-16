@@ -1,8 +1,9 @@
 import { ensureStartWith } from "../utils";
 import { SHOPIFY_GRAPHQL_API_ENDPOINT, TAGS } from "./constants";
 import { getMenuQuery } from "./queries/menu";
+import { getProductsQuery } from "./queries/products";
 import { isShopifyError } from "./type-guards";
-import { Menu, ShopifyMenuOperation } from "./types";
+import { Menu, Product, ShopifyMenuOperation, ShopifyProductsOperation } from "./types";
 
 const domain =  process.env.SHOPIFY_STORE_DOMAIN ? ensureStartWith(process.env.SHOPIFY_STORE_DOMAIN, "https://") : "";
 const endpoint = `${domain}/${SHOPIFY_GRAPHQL_API_ENDPOINT}`;
@@ -75,3 +76,28 @@ export async function getMenu(handle: string):  Promise<Menu[]> {
     ) || []
     ); 
 }
+
+export async function getProducts({
+    query,
+    reverse,
+    sortKey,
+  }: {
+    query?: string;
+    reverse?: boolean;
+    sortKey?: string;
+}): Promise<Product[] | any> {
+    const res = await shopifyFetch<ShopifyProductsOperation>({
+      query: getProductsQuery,
+      tags: [TAGS.products],
+      variables: {
+        query,
+        reverse,
+        sortKey,
+      },
+    });
+    console.log("--------------------------------");
+    console.log(res.body);
+    console.log(res.body.data.products.edges[0].node);
+    console.log("--------------------------------");
+    //return reshapeProducts(removeEdgesAndNodes(res.body.data.products));
+  }
