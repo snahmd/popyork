@@ -1,6 +1,8 @@
 import Search from "@/components/layout/navbar/search"
 import { getProducts } from "@/lib/shopify";
 import { sorting } from "@/lib/constants";
+import Grid from "@/components/grid";
+import ProductGridItems from "@/components/layout/product-grid-items";
 
 async function SearchPage({ searchParams }: {
     searchParams?: { [key: string]: string | string[] | undefined };
@@ -19,6 +21,10 @@ async function SearchPage({ searchParams }: {
                     <span className="font-bold">&quot;{searchValue}&quot;</span>
                 </p>
             ) : null}
+            {products.length > 0 ? (
+                <Grid className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                    <ProductGridItems products = {products}/>
+                </Grid> ) : null}
             
         </div>
     )

@@ -16,9 +16,13 @@ module.exports = {
       },
       keyframes: {
         fadeIn: {
-          from: { opacity: 0 },
+          from: { 
+            opacity: 0,
+            transform: 'translateY(-10px)'
+          },
           to: {
             opacity: 1,
+            transform: 'translateY(0)'
           },
         },
       },
@@ -28,7 +32,7 @@ module.exports = {
         "100%": { opacity: 0.2 },
       },
       animation: {
-        fadeIn: "fadeIn 0.3s ease-in-out",
+        fadeIn: "fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
         blink: "blink 1.4s both infinite",
       },
     },
