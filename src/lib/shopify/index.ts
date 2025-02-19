@@ -4,7 +4,7 @@ import { SHOPIFY_GRAPHQL_API_ENDPOINT, TAGS } from "../constants";
 import { getMenuQuery } from "./queries/menu";
 import { getProductsQuery } from "./queries/products";
 import { isShopifyError } from "../type-guards";
-import { Connection, Menu, Product, ShopifyMenuOperation, ShopifyProduct, ShopifyProductsOperation, Image } from "./types";
+import { Connection, Menu, Product, ShopifyMenuOperation, ShopifyProduct, ShopifyProductsOperation, Image, ShopifyCollectionProductsOperation, ShopifyCollectionsOperation, Collection } from "./types";
 
 const domain =  process.env.SHOPIFY_STORE_DOMAIN ? ensureStartWith(process.env.SHOPIFY_STORE_DOMAIN, "https://") : "";
 const endpoint = `${domain}/${SHOPIFY_GRAPHQL_API_ENDPOINT}`;
@@ -211,4 +211,63 @@ export async function getProducts({
     console.log("--------------------------------");
     
     return reshapedProducts;
+}
+
+
+
+export async function getCollections(): Promise<Collection[]> {
+  const res = await shopifyFetch<ShopifyCollectionsOperation>({
+    query: getCollectionsQuery,
+    tags: [TAGS.collections],
+  });
+
+  const shopifyCollections = removeEdgesAndNodes(res?.body?.data?.collections);
+  const collections = [
+    {
+      handle: "",
+      title: "All",
+      description: "All products",
+      seo: {
+        title: "All",
+        description: "All products",
+      },
+      path: "/search",
+      updatedAt: new Date().toISOString(),
+    },
+    // Filter out the hidden products
+    ...reshapeCollections(shopifyCollections).filter(
+      (collection) => !collection.handle.startsWith("hidden")
+    ),
+  ];
+
+  return collections;
+}
+
+export async function getCollectionProducts({
+  collection,
+  reverse,
+  sortKey,
+}: {
+  collection: string;
+  reverse?: boolean;
+  sortKey?: string;
+}): Promise<Product[]> {
+  const res = await shopifyFetch<ShopifyCollectionProductsOperation>({
+    query: getCollectionProductsQuery,
+    tags: [TAGS.collections, TAGS.products],
+    variables: {
+      handle: collection,
+      reverse,
+      sortKey: sortKey === "CREATED_AT" ? "CREATED" : sortKey,
+    },
+  });
+
+  if (!res.body.data.collection) {
+    console.log(`No collection found for \`${collection}\``);
+    return [];
+  }
+
+  return reshapeProducts(
+    removeEdgesAndNodes(res.body.data.collection.products)
+  );
 }
