@@ -4,7 +4,6 @@ import Link from "next/link";
 
 export default async function Footer() {
   const menu = await getMenu("footer-1"); 
-  console.log("footer-- ", menu);
   return (
     <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t dark:border-t-black">
       <nav className="sm:ml-auto flex gap-4 sm:gap-6">

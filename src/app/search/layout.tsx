@@ -1,18 +1,24 @@
 import Footer from "@/components/layout/footer";
 import Collections from "@/components/layout/search/collections";
 import FilterList from "@/components/layout/search/filter";
+import NewCollections from "@/components/layout/search/new-collections";
 import { sorting } from "@/lib/constants";
-
-export default function SearchLayout({
+import { getCollections } from "@/lib/shopify";
+export default async function SearchLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // get collections
+  const collections = await getCollections();
+  console.log(collections);
   return (
     <>
       <div className="mx-auto flex max-w-screen-2xl flex-col gap-8 px-4 pb-4 text-black md:flex-row dark:text-white">
         <div className="order-first w-full flex-none md:max-w-[125px]">
-          <Collections />
+          {/* <Collections /> */}
+          <NewCollections collections={collections} />
+          
         </div>
         <div className="order-last min-h-screen w-full md:order-none">
           {children}

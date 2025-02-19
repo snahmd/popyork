@@ -9,7 +9,6 @@ import LogoSquare from "@/components/logo-square";
 export async function Navbar() {
 
     const menu  = await getMenu("popyork-menu")
-    console.log(menu)
     return (
         <nav className="flex items-center justify-between p-4 lg:px-8">
             <div className="block flex-none md:hidden">
