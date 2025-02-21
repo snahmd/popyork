@@ -1,3 +1,8 @@
+/**
+ * Shopify entegrasyonu için ana modül
+ * Bu dosya Shopify Storefront API ile iletişim kurmak için gerekli tüm fonksiyonları içerir
+ */
+
 import { HIDDEN_PRODUCT_TAG } from "../constants";
 import { ensureStartWith } from "../utils";
 import { SHOPIFY_GRAPHQL_API_ENDPOINT, TAGS } from "../constants";
@@ -22,37 +27,37 @@ import {
     getCollectionsQuery,
 } from "./queries/collection";
 
+/**
+ * Shopify mağaza ayarları
+ * domain: Mağazanın tam URL'si
+ * endpoint: GraphQL API'nin endpoint'i
+ * key: API erişim anahtarı
+ */
 const domain = process.env.SHOPIFY_STORE_DOMAIN
     ? ensureStartWith(process.env.SHOPIFY_STORE_DOMAIN, "https://")
     : "";
 const endpoint = `${domain}/${SHOPIFY_GRAPHQL_API_ENDPOINT}`;
 const key = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN || "";
 
-// Generic tip yardımcısı - variables özelliğini çıkarmak için kullanılır
-type ExtractVariables<T> = T extends { variables: object } ? T["variables"]
-    : never;
+/**
+ * Generic tip yardımcısı
+ * GraphQL operasyonlarından variables özelliğini çıkarmak için kullanılır
+ */
+type ExtractVariables<T> = T extends { variables: object } ? T["variables"] : never;
 
 /**
  * Shopify API'sine GraphQL sorguları göndermek için temel fonksiyon
- * @param cache - İstek önbelleğini kontrol eder. Varsayılan değer 'force-cache':
- *   - 'force-cache': Her zaman önbelleği kullan
- *   - 'no-store': Önbellek kullanma, her zaman yeni istek yap
- *   - 'reload': Önbelleği yenile
- * @param headers - İsteğe eklenecek özel HTTP başlıkları
+ * @param cache - Önbellekleme stratejisi
+ * @param headers - İsteğe eklenecek HTTP başlıkları
  * @param query - GraphQL sorgusu
- * @param tags - Önbellekleme için kullanılan etiketler
- * @param variables - GraphQL sorgusuna gönderilecek değişkenler
+ * @param tags - Önbellekleme etiketleri
+ * @param variables - Sorgu değişkenleri
  */
 export async function shopifyFetch<T>({
-    // force-cache: Varsayılan olarak her zaman önbelleği kullan
     cache = "force-cache",
-    // İsteğe eklenecek özel başlıklar (opsiyonel)
     headers,
-    // GraphQL sorgusu (zorunlu)
     query,
-    // Önbellekleme etiketleri (opsiyonel)
     tags,
-    // Sorgu değişkenleri (opsiyonel)
     variables,
 }: {
     cache?: RequestCache;
@@ -64,52 +69,32 @@ export async function shopifyFetch<T>({
     try {
         // API isteğini gerçekleştir
         const result = await fetch(endpoint, {
-            // POST metodu kullanıyoruz çünkü GraphQL istekleri için standart
             method: "POST",
-
-            // İstek başlıklarını ayarla
             headers: {
-                // JSON formatında veri gönderileceğini belirt
                 "Content-Type": "application/json",
-                // Shopify API kimlik doğrulama anahtarı
                 "X-Shopify-Storefront-Access-Token": key,
-                // Varsa özel başlıkları ekle
                 ...headers,
             },
-
-            // İstek gövdesini oluştur
             body: JSON.stringify({
-                // Sorgu varsa ekle
                 ...(query && { query }),
-                // Değişkenler varsa ekle
                 ...(variables && { variables }),
             }),
-
-            // Önbellek stratejisini ayarla
             cache,
-
-            // Next.js için önbellekleme etiketlerini ekle
             ...(tags && { next: { tags } }),
         });
 
-        // API yanıtını JSON formatına çevir
         const body = await result.json();
 
-        // GraphQL hata kontrolü
         if (body.errors) {
-            // İlk hatayı fırlat
             throw body.errors[0];
         }
 
-        // Başarılı yanıtı döndür
         return {
-            status: result.status, // HTTP durum kodu
-            body, // API yanıt verisi
+            status: result.status,
+            body,
         };
     } catch (error) {
-        // Hata yönetimi
         if (isShopifyError(error)) {
-            // Shopify'a özgü hataları özel formatta fırlat
             throw {
                 cause: error.cause?.toString() || "Unknown",
                 status: error.status || 500,
@@ -117,7 +102,6 @@ export async function shopifyFetch<T>({
                 query,
             };
         }
-        // Diğer hataları genel formatta fırlat
         throw {
             error,
             query,
@@ -125,14 +109,18 @@ export async function shopifyFetch<T>({
     }
 }
 
-// Menü verilerini getiren fonksiyon
+/**
+ * Menü verilerini getiren fonksiyon
+ * @param handle - Menü tanımlayıcısı
+ * @returns Menü öğelerinin listesi
+ */
 export async function getMenu(handle: string): Promise<Menu[]> {
     const response = await shopifyFetch<ShopifyMenuOperation>({
         query: getMenuQuery,
         tags: [TAGS.collections],
         variables: { handle },
     });
-    // Menü öğelerini dönüştür ve yolları düzenle
+
     return (
         response.body?.data?.menu?.items?.map((
             item: { title: string; url: string },
@@ -146,12 +134,18 @@ export async function getMenu(handle: string): Promise<Menu[]> {
     );
 }
 
-// GraphQL edges ve nodes yapısını düz diziye çeviren yardımcı fonksiyon
+/**
+ * GraphQL edges ve nodes yapısını düz diziye çeviren yardımcı fonksiyon
+ * Shopify API'sinin döndürdüğü karmaşık yapıyı basitleştirir
+ */
 function removeEdgesAndNodes<T>(array: Connection<T>): T[] {
     return array.edges.map((edge) => edge?.node);
 }
 
-// Ürün görsellerini yeniden şekillendiren fonksiyon
+/**
+ * Ürün görsellerini işleyen ve yeniden yapılandıran fonksiyon
+ * Görsellere otomatik alt text ekler
+ */
 function reshapeImages(images: Connection<Image>, productTitle: string) {
     const flattened = removeEdgesAndNodes(images);
 
@@ -165,12 +159,14 @@ function reshapeImages(images: Connection<Image>, productTitle: string) {
     });
 }
 
-// Ürün verilerini yeniden şekillendiren fonksiyon
+/**
+ * Tek bir ürünün verilerini yeniden yapılandıran fonksiyon
+ * Gizli ürünleri filtreleyebilir ve veri yapısını düzenler
+ */
 function reshapeProduct(
     product: ShopifyProduct,
     filterHiddenProducts: boolean = true,
 ) {
-    // Gizli ürünleri filtrele
     if (
         !product ||
         (filterHiddenProducts && product.tags.includes(HIDDEN_PRODUCT_TAG))
@@ -187,7 +183,10 @@ function reshapeProduct(
     };
 }
 
-// Ürün listesini yeniden şekillendiren fonksiyon
+/**
+ * Ürün listesini işleyen ve yeniden yapılandıran fonksiyon
+ * Tüm ürünleri tek tek işler ve geçerli olanları döndürür
+ */
 function reshapeProducts(products: ShopifyProduct[]) {
     const reshapedProducts = [];
 
@@ -204,7 +203,10 @@ function reshapeProducts(products: ShopifyProduct[]) {
     return reshapedProducts;
 }
 
-// Ürünleri getiren ana fonksiyon
+/**
+ * Ürünleri getiren ana fonksiyon
+ * Arama, sıralama ve filtreleme özelliklerini destekler
+ */
 export async function getProducts({
     query,
     reverse,
@@ -214,7 +216,6 @@ export async function getProducts({
     reverse?: boolean;
     sortKey?: string;
 }): Promise<Product[] | any> {
-    // Ürünleri API'den al
     const res = await shopifyFetch<ShopifyProductsOperation>({
         query: getProductsQuery,
         tags: [TAGS.products],
@@ -225,12 +226,15 @@ export async function getProducts({
         },
     });
 
-    // Ürün verilerini işle ve dönüştür
     const products = removeEdgesAndNodes(res.body.data.products);
     const reshapedProducts = reshapeProducts(products);
     return reshapedProducts;
 }
 
+/**
+ * Koleksiyon verilerini yeniden yapılandıran fonksiyon
+ * URL yollarını düzenler ve koleksiyon bilgilerini formatlar
+ */
 function reshapeCollection(
     collection: ShopifyCollection,
 ): Collection | undefined {
@@ -242,6 +246,9 @@ function reshapeCollection(
     };
 }
 
+/**
+ * Koleksiyon listesini işleyen ve yeniden yapılandıran fonksiyon
+ */
 function reshapeCollections(collections: ShopifyCollection[]) {
     const reshapedCollections = [];
   
@@ -256,8 +263,12 @@ function reshapeCollections(collections: ShopifyCollection[]) {
     }
   
     return reshapedCollections;
-  }
+}
 
+/**
+ * Tüm koleksiyonları getiren fonksiyon
+ * "All" koleksiyonunu ekler ve gizli koleksiyonları filtreler
+ */
 export async function getCollections(): Promise<Collection[]> {
     const res = await shopifyFetch<ShopifyCollectionsOperation>({
         query: getCollectionsQuery,
@@ -279,7 +290,6 @@ export async function getCollections(): Promise<Collection[]> {
             path: "/search",
             updatedAt: new Date().toISOString(),
         },
-        // Filter out the hidden products
         ...reshapeCollections(shopifyCollections).filter(
             (collection) => !collection.handle.startsWith("hidden"),
         ),
@@ -288,6 +298,10 @@ export async function getCollections(): Promise<Collection[]> {
     return collections;
 }
 
+/**
+ * Belirli bir koleksiyonun ürünlerini getiren fonksiyon
+ * Sıralama ve filtreleme özelliklerini destekler
+ */
 export async function getCollectionProducts({
     collection,
     reverse,
