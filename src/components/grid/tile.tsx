@@ -1,8 +1,6 @@
 // Bu dosya, grid düzeninde kullanılan bir öğenin (tile) içeriğini render eden GridTileImage bileşenini içerir.
 // Resimler için "next/image" bileşeni kullanılarak performans ve optimizasyon hedeflenmiştir.
-import clsx from "clsx";
 import Image from "next/image";
-import Label from "../layout/label";
 
 // GridTileImage fonksiyonu, grid içerisindeki bir öğenin resmini ve opsiyonel olarak etkileşimli label'ı render eder.
 // Parametreler: 
@@ -46,12 +44,12 @@ export function GridTileImage({ isInteractive = true, active, label, ...props } 
             />
           ) : null}
           {label ? (
-            <Label  
+            <Label
               // Label bileşeni:
               // - label parametresi mevcutsa çalışır.
               // - Resmin üzerine metin olarak başlık, miktar ve para birimi bilgilerini ekler.
               title={label.title}
-              amount={parseFloat(label.amount)}
+              amount={label.amount}
               currencyCode={label.currencyCode}
               position={label.position}
             />
