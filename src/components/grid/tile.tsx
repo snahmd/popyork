@@ -1,6 +1,9 @@
 // Bu dosya, grid düzeninde kullanılan bir öğenin (tile) içeriğini render eden GridTileImage bileşenini içerir.
 // Resimler için "next/image" bileşeni kullanılarak performans ve optimizasyon hedeflenmiştir.
 import Image from "next/image";
+import clsx from "clsx";
+import Label from "../layout/label";
+
 
 // GridTileImage fonksiyonu, grid içerisindeki bir öğenin resmini ve opsiyonel olarak etkileşimli label'ı render eder.
 // Parametreler: 
@@ -37,7 +40,7 @@ export function GridTileImage({ isInteractive = true, active, label, ...props } 
               // Resim bileşeni:
               // - props.src mevcutsa resmi render eder.
               // - isInteractive true ise hover durumunda scale efekti eklenir.
-              className={clsx("relative h-full w-full object-contain", {
+              className={clsx("relative h-full w-full object-cover", {
                 "transition duration-300 ease-in-out group-hover:scale-105": isInteractive,
               })}
               {...props}

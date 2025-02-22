@@ -127,7 +127,7 @@ export async function getMenu(handle: string): Promise<Menu[]> {
         ) => ({
             title: item.title,
             path: item.url.replace(domain, "").replace(
-                "/collections",
+                "collections",
                 "/search",
             ).replace("/pages", ""),
         })) || []
@@ -328,5 +328,5 @@ export async function getCollectionProducts({
 
     return reshapeProducts(
         removeEdgesAndNodes(res.body.data.collection.products),
-    );
+    );  
 }

@@ -29,7 +29,7 @@ export default function ProductGridItems({ products }: { products: Product[] }) 
               - className: Link'in görünüm ve davranış özellikleri
             */}
             <Link href={`/products/${product.handle}`} className="relative inline-block w-full h-full" prefetch={true}>
-            </Link>
+            
             {/* 
               GridTileImage: Ürün görselini ve bilgilerini gösteren özel bileşen
               label prop'u içinde:
@@ -52,6 +52,7 @@ export default function ProductGridItems({ products }: { products: Product[] }) 
                 height={product.images[0].height} // Görsel yüksekliği
                 alt={product.title} // Erişilebilirlik için alternatif metin
             />
+            </Link>
         </Grid.Item>
     ))}
     </>
