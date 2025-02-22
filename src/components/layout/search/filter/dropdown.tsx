@@ -15,7 +15,7 @@ export default function FilterItemDropDown({ list }: { list: ListItem[] }) {
   const [active, setActive] = useState("");
   const [openSelect, setOpenSelect] = useState(false);
 
-  // Dropdown menüsünün DOM referansını tutmak için ref
+  // Dropdown menüsünün DOM referansını tutmak için ref 
   const ref = useRef<HTMLDivElement>(null);
 
   // Dropdown dışına tıklandığında menüyü kapatmak için etki
