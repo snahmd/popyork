@@ -21,6 +21,7 @@ async function SearchPage({ searchParams }: {
     // sortKey: Sıralama anahtarı (örn: TITLE, PRICE)
     // reverse: Sıralamanın yönü (artan/azalan)
     const products = await getProducts({ query: searchValue, sortKey, reverse });
+    console.log(products)
     
     // Sonuç metni için tekil/çoğul kontrolü
     const resultsText = products.length === 1 ? "result" : "results";

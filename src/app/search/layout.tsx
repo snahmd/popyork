@@ -14,7 +14,6 @@ export default async function SearchLayout({
 }) {
   // Koleksiyon verilerini çekmek için asenkron fonksiyon kullanılıyor.
   const collections = await getCollections();
-  console.log(collections); // Konsola çekilen koleksiyon verilerini yazdırır.
   
   return (
     <>
