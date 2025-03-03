@@ -3,6 +3,7 @@ import {productFragment} from "@/lib/shopify/fragments/product"
 import ProductGallery from './ProductGallery'
 import { ArrowLeftIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
 import VariantSelector from './VariantSelector';
+import { ProductVariant } from '@/lib/shopify/types';
 
 type Props = {
   params: {
@@ -34,8 +35,6 @@ const getProduct = async (handle: string) => {
 
   const data = await response.json();
   const sonuc = data?.data?.product;
-  console.log("sonuc:")
-  console.log(sonuc)
   let variants = sonuc?.variants?.edges;
   variants = variants?.map((variant: any) => variant.node);
   sonuc.variants = variants;
@@ -48,6 +47,11 @@ const getProduct = async (handle: string) => {
 
 const ProductPage = async ({params}: Props) => {
   const product = await getProduct(params.handle)
+  console.log(product.priceRange)
+  const currency = product.priceRange.minVariantPrice.currencyCode;
+  const price = product.priceRange.minVariantPrice.amount;
+  console.log(currency)
+  console.log(price)
   
   return (
     <div className="container mx-auto px-4 py-10">
@@ -60,18 +64,9 @@ const ProductPage = async ({params}: Props) => {
             <h1 className="text-3xl font-bold">{product.title}</h1>
             <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: product.description }}></div>
             
-            <div className="border-t pt-6">
-              <div className="flex items-center justify-between">
-                <div className="text-2xl font-semibold">
-                  {new Intl.NumberFormat('tr-TR', {
-                    style: 'currency',
-                    currency: product.priceRange.maxVariantPrice.currencyCode
-                  }).format(parseFloat(product.priceRange.maxVariantPrice.amount))}
-                </div>
-              </div>
-            </div>
+            
 
-            <VariantSelector options={product.options} variants={product.variants} />
+            <VariantSelector options={product.options} variants={product.variants} currency={currency} price={price} />
           </div>
         </div>
       </div>
